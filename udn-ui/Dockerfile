@@ -1,4 +1,4 @@
-FROM dbmi/pic-sure-hpds-ui:master.0800720 AS pic-sure-ui
+FROM dbmi/pic-sure-hpds-ui:nate_dev_bcef99a5 AS pic-sure-ui
 FROM dbmi/pic-sure-auth-ui:master.f2d3274 as psama-ui
 FROM httpd:2.4.27-alpine
 
@@ -29,5 +29,5 @@ COPY --from=pic-sure-ui /usr/local/apache2/htdocs/picsureui /usr/local/apache2/h
 ADD src/main/webapp/picsureui /usr/local/apache2/htdocs/picsureui/
 #ADD src/main/webapp/psamaui /usr/local/apache2/htdocs/psamaui/
 
-ADD picsure-logo-200x36px.png ${HTTPD_PREFIX}/htdocs/picsureui/static/logo.png
-ADD picsure-logo-200x36px.png ${HTTPD_PREFIX}/htdocs/images/logo.png
+ADD src/main/resources/udn_logo.png ${HTTPD_PREFIX}/htdocs/picsureui/static/logo.png
+ADD src/main/resources/udn_logo.png ${HTTPD_PREFIX}/htdocs/images/logo.png
