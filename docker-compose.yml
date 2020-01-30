@@ -1,0 +1,67 @@
+version: '3.3'
+services:
+
+  httpd:
+    build:
+      context: ./udn-ui
+      dockerfile: Dockerfile
+    volumes:
+      - /usr/local/docker-config/httpd/psamaui/settings/:/usr/local/apache2/htdocs/psamaui/settings/
+      - /usr/local/docker-config/httpd/picsureui/settings/:/usr/local/apache2/htdocs/picsureui/settings/
+      - /usr/local/docker-config/httpd/cert:/usr/local/apache2/cert
+      - /usr/local/docker-config/httpd/static:/usr/local/apache2/htdocs/static
+      - /usr/local/docker-config/httpd/static:/usr/local/apache2/htdocs/picsureui/static
+    networks:
+      - pic-sure-udn_public
+    restart: always
+    ports:
+      - 80:80
+      - 443:443
+
+
+
+  wildfly:
+    image: jboss/wildfly:17.0.0.Final
+    volumes:
+      - /usr/local/docker-config/wildfly/modules/system/layers/base/com/sql/:/opt/jboss/wildfly/modules/system/layers/base/com/sql/
+      - /usr/local/docker-config/wildfly/deployments/:/opt/jboss/wildfly/standalone/deployments/
+      - /usr/local/docker-config/wildfly/standalone.xml:/opt/jboss/wildfly/standalone/configuration/standalone.xml
+      - /usr/local/docker-config/wildfly/emailTemplates:/opt/jboss/wildfly/emailTemplates/
+    networks:
+      - pic-sure-udn_public
+    restart: always
+    entrypoint: /opt/jboss/wildfly/bin/standalone.sh -b 0.0.0.0 -bmanagement 0.0.0.0 --debug 0.0.0.0:8787
+    expose:
+      - 8787
+    user: root
+    depends_on:
+      - copy-picsure2-war
+      - copy-picsureauth-war
+    ports:
+      - 8081:8080
+      - 9990:9990
+      - 8787:8787
+    env_file:
+      - ${ENV_FILE}
+
+  copy-picsure2-war:
+    image: dbmi/picsure2:${picsure2_version}
+    user: root
+    volumes:
+      - /usr/local/docker-config/wildfly/:/opt/local/docker-config/wildfly/
+    networks:
+      - pic-sure-udn_public
+    entrypoint: cp /opt/jboss/wildfly/standalone/deployments/pic-sure-api-2.war /opt/local/docker-config/wildfly/deployments/
+
+  copy-picsureauth-war:
+    image: dbmi/pic-sure-auth-services:${picsure_auth_version}
+    user: root
+    volumes:
+      - /usr/local/docker-config/wildfly/:/opt/local/docker-config/wildfly/
+    networks:
+      - pic-sure-udn_public
+    entrypoint: cp /opt/jboss/wildfly/standalone/deployments/pic-sure-auth-services.war /opt/local/docker-config/wildfly/deployments/
+
+networks:
+  pic-sure-udn_public:
+    external: true
