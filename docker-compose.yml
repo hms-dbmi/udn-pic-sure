@@ -1,6 +1,32 @@
 version: '3.3'
 services:
 
+  hpds:
+    image: dbmi/pic-sure-hpds:master_02635a9
+    environment:
+      - HEAPSIZE=4096
+      - CACHESIZE=10000
+      - SMALL_TASK_THREADS=1
+      - LARGE_TASK_THREADS=1
+      - SMALL_JOB_SIZE=100
+      - ID_BATCH_SIZE=2000
+      - SURVIVOR_RATIO=255
+    restart: always
+    entrypoint: java -Xdebug -Xrunjdwp:transport=dt_socket,address=0.0.0.0:8000,server=y,suspend=n -XX:+UseParallelGC -XX:SurvivorRatio=250 -Xms4096m -Xmx4096m -server -jar hpds.jar -httpPort 8080 -DCACHE_SIZE=10000 -DSMALL_TASK_THREADS=1 -DLARGE_TASK_THREADS=1 -DSMALL_JOB_LIMIT=100 -DID_BATCH_SIZE=2000 "-DID_CUBE_NAME=NONE" "-DALL_IDS_CONCEPT=\\000_UDN ID\\"
+    volumes:
+      - /scratch/Jan_31_2020/hpds:/opt/local/hpds
+      - /scratch/Jan_31_2020/hpds:/opt/local/hpds/all
+
+    networks:
+      - pic-sure-udn_public
+    expose:
+      - 8080
+    ports:
+      - 8787:8000
+
+
+
+
   httpd:
     build:
       context: ./udn-ui
@@ -40,7 +66,7 @@ services:
     ports:
       - 8081:8080
       - 9990:9990
-      - 8787:8787
+    #  - 8787:8787
     env_file:
       - ${ENV_FILE}
 
