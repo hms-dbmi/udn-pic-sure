@@ -1,4 +1,4 @@
-FROM dbmi/pic-sure-hpds-ui:nate_dev_bcef99a5 AS pic-sure-ui
+FROM dbmi/pic-sure-hpds-ui:nate_dev_09627a911 AS pic-sure-ui
 FROM dbmi/pic-sure-auth-ui:master.f2d3274 as psama-ui
 FROM httpd:2.4.27-alpine
 
